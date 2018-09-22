@@ -1,5 +1,4 @@
 chroma\_stft([y, sr, S, norm, n\_fft, …]) | Compute a chromagram from a waveform or power spectrogram.
-:-----:|:-----:
 chroma\_cqt([y, sr, C, hop\_length, fmin, …]) |Constant-Q chromagram
 chroma\_cens([y, sr, C, hop\_length, fmin, …]) |Computes the chroma variant “Chroma Energy Normalized” (CENS), following [R674badebce0d-1].
 melspectrogram([y, sr, S, n\_fft, …]) |Compute a mel-scaled spectrogram.
