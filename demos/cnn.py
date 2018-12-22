@@ -3,6 +3,16 @@ import numpy as np
 from scipy.spatial.distance import euclidean
 from sklearn.metrics.pairwise import euclidean_distances
 
+def oti_func(original_features, cover_features):
+    profile1 = np.sum(original_features.T, axis = 1)
+    profile2 = np.sum(cover_features.T, axis = 1)
+    oti = [0] * 12
+    for i in range(profile2.shape[0]):
+        oti[i] = np.dot(profile1, np.roll(profile2, i))
+    oti.sort(reverse=True)
+    newmusic = np.roll(cover_features.T, int(oti[0]))
+    return newmusic.T
+
 def extract_features(signal):
     return librosa.feature.chroma_stft(signal)[:12, :180].T
 
@@ -23,4 +33,5 @@ cover_signal = librosa.load(cover_song)[0]
 
 original_features = extract_features(original_signal)
 cover_features = extract_features(cover_signal)
-mat = sim_matrix(original_features, cover_features)
+oti_cover_features = oti_func(original_features, cover_features)
+mat = sim_matrix(original_features, oti_cover_features)
