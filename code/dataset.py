@@ -59,3 +59,5 @@ def npair(directory):
                     mat = sim_matrix(original_features, oti_cover_features)
                     np.savetxt("../data/csm/npair/{}{}.csv".format(oname.split("_")[1], filename.split("_")[2].split(".")[0]), mat, delimiter=",")
                     c += 1
+
+npair(directory)
