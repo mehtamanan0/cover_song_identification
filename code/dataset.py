@@ -52,12 +52,15 @@ def npair(directory):
             if cov.split("_")[2].split(".")[0] == '01':
                 oname = cov
                 original_features = genfromtxt(cov, delimiter=',').T
-            else:
-                if cov.split("_")[2].split(".")[0] != oname.split("_")[2].split(".")[0]:
-                    cover_features = genfromtxt(cov, delimiter=',').T
+                dirlis = [x for x in os.listdir(directory) if x.endswith(".csv") and x.split("_")[2].split(".")[0] != '01' and x.split("_")[1] != oname.split("_")[1]]
+                for each in dirlis:
+                    path = os.path.join(directory, each)
+                    cover_features = genfromtxt(path, delimiter=',').T
                     oti_cover_features = oti_func(original_features, cover_features)
                     mat = sim_matrix(original_features, oti_cover_features)
-                    np.savetxt("../data/csm/npair/{}{}.csv".format(oname.split("_")[1], filename.split("_")[2].split(".")[0]), mat, delimiter=",")
+                    print("{}_{}_{}.csv".format(oname.split("_")[1], each.split("_")[1], each.split("_")[2].split(".")[0]))
+                    np.savetxt("../data/csm/npair/{}_{}_{}.csv".format(oname.split("_")[1], each.split("_")[1], each.split("_")[2].split(".")[0]), mat, delimiter=",")
                     c += 1
+
 
 npair(directory)
