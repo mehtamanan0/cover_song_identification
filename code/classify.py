@@ -1,7 +1,8 @@
 from sklearn.externals import joblib
 import librosa, librosa.display
-
-import sys
+import numpy as np
+from scipy.spatial.distance import euclidean
+from sklearn.metrics.pairwise import euclidean_distances
 
 def oti_func(original_features, cover_features):
     profile1 = np.sum(original_features.T, axis = 1)
@@ -27,8 +28,8 @@ def sim_matrix(original_features, cover_features):
 
 model = joblib.load("../data/models/model.pkl")
 
-original_song = sys.argv[1]
-cover_song = sys.argv[2]
+original_song = '../data/test_data/Original.mp3'
+cover_song = '../data/test_data/Cover.mp3'
 
 original_signal = librosa.load(original_song)[0]
 cover_signal = librosa.load(cover_song)[0]
@@ -45,4 +46,6 @@ if mat.shape[0] < 180:
 if mat.shape[1] < 180:
     mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
 
-print(model.predict(mat))
+ans = model.predict(mat.reshape(1,180,180,1))
+if ans[0][0] < ans[0][1]: print("The song is a cover pair with probability of : {}".format(ans[0][1]))
+else: print("The song is not a cover pair with probability of : {}".format(ans[0][0]))
