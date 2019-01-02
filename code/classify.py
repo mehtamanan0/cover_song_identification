@@ -45,4 +45,4 @@ if mat.shape[0] < 180:
 if mat.shape[1] < 180:
     mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
 
-print(model.predect(mat))
+print(model.predict(mat))
