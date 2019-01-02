@@ -1,37 +1,70 @@
-import librosa, librosa.display
+import keras
+import os
 import numpy as np
-from scipy.spatial.distance import euclidean
-from sklearn.metrics.pairwise import euclidean_distances
+from numpy import genfromtxt
+from keras.datasets import mnist
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from sklearn.externals import joblib
 
-def oti_func(original_features, cover_features):
-    profile1 = np.sum(original_features.T, axis = 1)
-    profile2 = np.sum(cover_features.T, axis = 1)
-    oti = [0] * 12
-    for i in range(profile2.shape[0]):
-        oti[i] = np.dot(profile1, np.roll(profile2, i))
-    oti.sort(reverse=True)
-    newmusic = np.roll(cover_features.T, int(oti[0]))
-    return newmusic.T
+batch_size = 128
+epochs = 12
+num_classes = 2
 
-def extract_features(signal):
-    return librosa.feature.chroma_stft(signal)[:12, :180].T
+#check for train file
+if os.path.isfile('../data/models/train.pkl'):
+    X, y = joblib.load('../data/models/train.pkl')
 
-def sim_matrix(original_features, cover_features):
-    similarity_matrix = []
-    for each in original_features:
-        sm = []
-        for beach in cover_features:
-            sm.append(euclidean(each, beach))
-        similarity_matrix.append(sm)
-    return np.array(similarity_matrix)
+#generate training data
+else:
+    p_lis = [os.path.join('../data/csm/pair/', x) for x in os.listdir('../data/csm/pair/')]
+    n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')]
 
-original_song = "../data/test_data/Original.mp3"
-cover_song = "../data/test_data/Cover.mp3"
+    X = [genfromtxt(x, delimiter=',') for x in p_lis] + [genfromtxt(x, delimiter=',') for x in n_lis]
+    y = [1] * len(p_lis) + [0] * len(n_lis)
 
-original_signal = librosa.load(original_song)[0]
-cover_signal = librosa.load(cover_song)[0]
+    #dump model 
+    joblib.dump((X,y), '../data/models/train.pkl')
 
-original_features = extract_features(original_signal)
-cover_features = extract_features(cover_signal)
-oti_cover_features = oti_func(original_features, cover_features)
-mat = sim_matrix(original_features, oti_cover_features)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+x_train = np.stack(x_train, axis=0)
+x_test = np.stack(x_test, axis=0)
+
+#reshape
+x_train = x_train.reshape(x_train.shape[0],180,180,1)
+x_test = x_test.reshape(x_test.shape[0],180,180,1)
+
+#standardise
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
+
+#model architecture
+model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(180, 180, 1)))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
+
+#compile
+model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adadelta(),
+              metrics=['accuracy'])
+
+#model fit
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=1,
+          validation_data=(x_test, y_test))
+score = model.evaluate(x_test, y_test, verbose=0)
+print("saving model...")
+joblib.dump(model, '../data/models/model.pkl')
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])

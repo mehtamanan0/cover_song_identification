@@ -37,8 +37,12 @@ def pair(directory):
             else:
                 cover_features = genfromtxt(cov, delimiter=',').T
                 oti_cover_features = oti_func(original_features, cover_features)
-                mat = sim_matrix(original_features, oti_cover_features)
-                np.savetxt("../data/csm/pair/{}{}.csv".format(oname.split("_")[1], filename.split("_")[2].split(".")[0]), mat, delimiter=",")
+                mat = sim_matrix(original_features, oti_cover_features)[:180, :180]
+                if mat.shape[0] < 180:
+                    mat = np.pad(mat, ((0,180 - mat.shape[0]),(0,0)), mode = 'constant', constant_values=0)
+                if mat.shape[1] < 180:
+                    mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
+                np.savetxt("../data/csm/pair/{}_{}_{}.csv".format(oname.split("_")[1], cov.split("_")[1], cov.split("_")[2].split(".")[0]), mat, delimiter=",")
         else:
             continue
 
@@ -57,8 +61,11 @@ def npair(directory):
                     path = os.path.join(directory, each)
                     cover_features = genfromtxt(path, delimiter=',').T
                     oti_cover_features = oti_func(original_features, cover_features)
-                    mat = sim_matrix(original_features, oti_cover_features)
-                    print("{}_{}_{}.csv".format(oname.split("_")[1], each.split("_")[1], each.split("_")[2].split(".")[0]))
+                    mat = sim_matrix(original_features, oti_cover_features)[:180, :180]
+                    if mat.shape[0] < 180:
+                        mat = np.pad(mat, ((0,180 - mat.shape[0]),(0,0)), mode = 'constant', constant_values=0)
+                    if mat.shape[1] < 180:
+                        mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
                     np.savetxt("../data/csm/npair/{}_{}_{}.csv".format(oname.split("_")[1], each.split("_")[1], each.split("_")[2].split(".")[0]), mat, delimiter=",")
                     c += 1
 
