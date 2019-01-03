@@ -9,8 +9,8 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from sklearn.externals import joblib
 
-batch_size = 128
-epochs = 12
+batch_size = 80
+epochs = 1
 num_classes = 2
 
 #check for train file
@@ -20,13 +20,13 @@ if os.path.isfile('../data/models/train.pkl'):
 #generate training data
 else:
     p_lis = [os.path.join('../data/csm/pair/', x) for x in os.listdir('../data/csm/pair/')]
-    n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')]
+    n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')][:5000]
 
     X = [genfromtxt(x, delimiter=',') for x in p_lis] + [genfromtxt(x, delimiter=',') for x in n_lis]
     y = [1] * len(p_lis) + [0] * len(n_lis)
 
     #dump model 
-    joblib.dump((X,y), '../data/models/train.pkl')
+    joblib.dump((X,y), '../data/models/train_{}.pkl'.format(len(nlis)))
 
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -65,6 +65,6 @@ model.fit(x_train, y_train,
           validation_data=(x_test, y_test))
 score = model.evaluate(x_test, y_test, verbose=0)
 print("saving model...")
-joblib.dump(model, '../data/models/model.pkl')
+joblib.dump(model, '../data/models/model_{}.pkl'.format(len(n_lis) + len(p_lis)))
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])

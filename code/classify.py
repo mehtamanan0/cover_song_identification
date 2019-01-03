@@ -3,6 +3,7 @@ import librosa, librosa.display
 import numpy as np
 from scipy.spatial.distance import euclidean
 from sklearn.metrics.pairwise import euclidean_distances
+import sys
 
 def oti_func(original_features, cover_features):
     profile1 = np.sum(original_features.T, axis = 1)
@@ -28,8 +29,8 @@ def sim_matrix(original_features, cover_features):
 
 model = joblib.load("../data/models/model.pkl")
 
-original_song = '../data/test_data/Original.mp3'
-cover_song = '../data/test_data/Cover.mp3'
+original_song = sys.argv[1]
+cover_song = sys.argv[2]
 
 original_signal = librosa.load(original_song)[0]
 cover_signal = librosa.load(cover_song)[0]
