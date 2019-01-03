@@ -15,10 +15,12 @@ num_classes = 2
 
 #check for train file
 if os.path.isfile('../data/models/train.pkl'):
+    print("Loading data from pickle")
     X, y = joblib.load('../data/models/train.pkl')
 
 #generate training data
 else:
+    print("Generating data")
     p_lis = [os.path.join('../data/csm/pair/', x) for x in os.listdir('../data/csm/pair/')]
     n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')][:5000]
 
@@ -26,8 +28,9 @@ else:
     y = [1] * len(p_lis) + [0] * len(n_lis)
 
     #dump model 
-    joblib.dump((X,y), '../data/models/train_{}.pkl'.format(len(nlis)))
+    joblib.dump((X,y), '../data/models/train_{}.pkl'.format(len(n_lis)))
 
+print("splitting")
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 x_train = np.stack(x_train, axis=0)
@@ -58,6 +61,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               metrics=['accuracy'])
 
 #model fit
+print("Training")
 model.fit(x_train, y_train,
           batch_size=batch_size,
           epochs=epochs,
