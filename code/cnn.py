@@ -45,46 +45,47 @@ y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
 #model architecture
-print(x_train.shape)
+
 #block 1
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(5, 5), activation='relu', input_shape=(180,180,1)))
 model.add(Conv2D(32, kernel_size=(5, 5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(BatchNormalization())
-print ("block 1 {}".format(model.output_shape))
+
 #block 2
 model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(Conv2D(16, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(BatchNormalization())
-print ("block 2 {}".format(model.output_shape))
+
 #block 3
 model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(Conv2D(16, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(BatchNormalization())
-print ("block 3 {}".format(model.output_shape))
+
 #block 4
 model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(Conv2D(16, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(BatchNormalization())
-print ("block 4 {}".format(model.output_shape))
+
 #block 5
 model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(Conv2D(16, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(BatchNormalization())
-print ("block 5 {}".format(model.output_shape))
+
 #final layers
 model.add(Dropout(0.5))
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))
 model.add(Dropout(0.25))
-print ("block final {}".format(model.output_shape))
 model.add(Dense(2, activation='softmax'))
-print ("block final {}".format(model.output_shape))
+
+print(model.summary())
+
 #compile
 model.compile(loss='binary_crossentropy',
                   optimizer='adam',
