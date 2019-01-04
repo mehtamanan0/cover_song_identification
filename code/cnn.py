@@ -31,7 +31,7 @@ else:
     joblib.dump((X,y), '../data/models/train_{}.pkl'.format(len(n_lis)))
 
 print("splitting")
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
 x_train = np.stack(x_train, axis=0)
 x_test = np.stack(x_test, axis=0)
