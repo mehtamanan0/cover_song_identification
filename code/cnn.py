@@ -5,11 +5,11 @@ from numpy import genfromtxt
 from keras.datasets import mnist
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Dense, Dropout, Flatten, BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D
 from sklearn.externals import joblib
 
-batch_size = 80
+batch_size = 64
 epochs = 1
 num_classes = 2
 
@@ -45,20 +45,50 @@ y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
 #model architecture
+print(x_train.shape)
+#block 1
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(180, 180, 1)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(Conv2D(32, kernel_size=(5, 5), activation='relu', input_shape=(180,180,1)))
+model.add(Conv2D(32, kernel_size=(5, 5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128, activation='relu'))
+model.add(BatchNormalization())
+print ("block 1 {}".format(model.output_shape))
+#block 2
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(BatchNormalization())
+print ("block 2 {}".format(model.output_shape))
+#block 3
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(BatchNormalization())
+print ("block 3 {}".format(model.output_shape))
+#block 4
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(BatchNormalization())
+print ("block 4 {}".format(model.output_shape))
+#block 5
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(BatchNormalization())
+print ("block 5 {}".format(model.output_shape))
+#final layers
 model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-
+model.add(Flatten())
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.25))
+print ("block final {}".format(model.output_shape))
+model.add(Dense(2, activation='softmax'))
+print ("block final {}".format(model.output_shape))
 #compile
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
+model.compile(loss='binary_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
 
 #model fit
 print("Training")
@@ -69,6 +99,6 @@ model.fit(x_train, y_train,
           validation_data=(x_test, y_test))
 score = model.evaluate(x_test, y_test, verbose=0)
 print("saving model...")
-joblib.dump(model, '../data/models/model_{}.pkl'.format(len(n_lis) + len(p_lis)))
+joblib.dump(model, '../data/models/model_{}.pkl'.format(x_train.shape[0]))
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
