@@ -1,13 +1,18 @@
 import keras
 import os
 import numpy as np
-from numpy import genfromtxt
+import time
+import pandas as pd
 from keras.datasets import mnist
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D
 from sklearn.externals import joblib
+from multiprocessing import Pool
+
+def lis_append(lis):
+    return pd.read_csv(lis, header=None).values
 
 batch_size = 64
 epochs = 1
@@ -22,12 +27,21 @@ if os.path.isfile('../data/models/train.pkl'):
 else:
     print("Generating data")
     p_lis = [os.path.join('../data/csm/pair/', x) for x in os.listdir('../data/csm/pair/')]
-    n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')][:5000]
+    n_lis = [os.path.join('../data/csm/npair/', x) for x in os.listdir('../data/csm/npair/')]
 
-    X = [genfromtxt(x, delimiter=',') for x in p_lis] + [genfromtxt(x, delimiter=',') for x in n_lis]
-    y = [1] * len(p_lis) + [0] * len(n_lis)
+    y = [1] * len(p_lis)
+    y1 = [0] * len(n_lis)
+    y.extend(y1)
 
-    #dump model 
+    p_lis.extend(n_lis)
+
+    start_time = time.time()
+    p = Pool(processes=80)
+    X = p.map(lis_append, p_lis)
+    p.close()
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    #dump model
     joblib.dump((X,y), '../data/models/train_{}.pkl'.format(len(n_lis)))
 
 print("splitting")
