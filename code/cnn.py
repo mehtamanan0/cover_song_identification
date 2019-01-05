@@ -100,6 +100,6 @@ model.fit(x_train, y_train,
           validation_data=(x_test, y_test))
 score = model.evaluate(x_test, y_test, verbose=0)
 print("saving model...")
-joblib.dump(model, '../data/models/model_{}.pkl'.format(x_train.shape[0]))
+model.save('../data/models/model_{}.h5'.format(x_train.shape[0]))
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])

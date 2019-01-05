@@ -4,6 +4,7 @@ import numpy as np
 from scipy.spatial.distance import euclidean
 from sklearn.metrics.pairwise import euclidean_distances
 import sys
+from keras.models import load_model
 
 def oti_func(original_features, cover_features):
     profile1 = np.sum(original_features.T, axis = 1)
@@ -27,10 +28,10 @@ def sim_matrix(original_features, cover_features):
         similarity_matrix.append(sm)
     return np.array(similarity_matrix)
 
-model = joblib.load("../data/models/model.pkl")
+model = load_model(sys.argv[1])
 
-original_song = sys.argv[1]
-cover_song = sys.argv[2]
+original_song = sys.argv[2]
+cover_song = sys.argv[3]
 
 original_signal = librosa.load(original_song)[0]
 cover_signal = librosa.load(cover_song)[0]
