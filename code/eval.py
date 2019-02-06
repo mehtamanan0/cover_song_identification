@@ -2,7 +2,6 @@ import operator
 import pprint
 import os
 import pandas as pd
-import librosa, librosa.display
 import numpy as np
 from scipy.spatial.distance import euclidean
 from sklearn.metrics.pairwise import euclidean_distances
