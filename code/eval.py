@@ -43,18 +43,20 @@ def eval_metrics():
     mr1 = 0
     mnit10 = 0
     apc = 0
-    for each in sorted(os.listdir(directory)):
+    for each in sorted(os.listdir(directory))[:22]:
         if each.split("_")[-1].split(".")[0] == '01':
             original_files.append(os.path.join(directory, each))
             pair_file.append(os.path.join(directory, each))
         else:
             pair_file.append(os.path.join(directory, each))
 
-    p_bar = tqdm(total = len(pair_file))
     for cov in original_files:
+        p_bar = tqdm(total = len(pair_file))
         cover_features = load_extract(cov)
         dic = {}
         for ncov in pair_file:
+            if cov == ncov:
+                continue
             p_bar.update(1)
             original_features = load_extract(ncov)
             oti_cov = oti_func(original_features, cover_features)
@@ -82,7 +84,7 @@ def eval_metrics():
         print("average precision : {}".format(apc))
         print("cover count: {}".format(t_cover))
         mri += 1/rank
-    p_bar.close()
+        p_bar.close()
     mean_ap = apc/len(original_files)
     mr1 = mri/len(original_files)
     mnit10 = t_cover/3300
