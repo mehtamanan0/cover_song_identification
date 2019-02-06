@@ -1,4 +1,5 @@
 import operator
+import pprint
 import os
 import pandas as pd
 import librosa, librosa.display
@@ -9,7 +10,7 @@ import sys
 from multiprocessing import Pool
 from keras.models import load_model
 from tqdm import tqdm
-
+pp = pprint.PrettyPrinter(indent=4)
 model = load_model('../data/models/model_1637.h5')
 
 def oti_func(original_features, cover_features):
@@ -42,16 +43,16 @@ def eval_metrics():
     mri = 0
     mr1 = 0
     mnit10 = 0
-
+    apc = 0
     for each in sorted(os.listdir(directory)):
         if each.split("_")[-1].split(".")[0] == '01':
             original_files.append(os.path.join(directory, each))
         else:
             pair_file.append(os.path.join(directory, each))
 
+    p_bar = tqdm(total = len(pair_file))
     for cov in original_files:
         cover_features = load_extract(cov)
-        p_bar = tqdm(total = len(pair_file))
         dic = {}
         for ncov in pair_file:
             p_bar.update(1)
@@ -64,8 +65,11 @@ def eval_metrics():
                 mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
             dic[ncov.split("/")[-1].split(".")[0]] = model.predict(mat.reshape(1,180,180,1))[0][1]
         l = sorted(dic.items(), key=operator.itemgetter(1), reverse=True)[:10]
+        print(cov.split("/")[-1].split("_")[1])
+        pp.pprint(l)
         flag = 1
         rank = 0
+        ap = 0
         for i, c in enumerate(l):
             if cov.split("/")[-1].split("_")[1] == c[0].split("_")[1]:
                 if flag:
@@ -73,12 +77,16 @@ def eval_metrics():
                     rank = i + 1
                     print("rank : {}".format(rank))
                 t_cover += 1
-                print(t_cover)
-        mri += rank
+                ap += (c[1] * 1)
+        apc += ap/11
+        print("average precision : {}".format(apc))
+        print("cover count: {}".format(t_cover))
+        mri += 1/rank
+    p_bar.close()
+    mean_ap = apc/len(original_files)
     mr1 = mri/len(original_files)
     mnit10 = t_cover/3300
-    return mnit10, mr1
+    return mnit10, mr1, mean_ap
 
-def map()
-
-mnit()
+a, b, c = eval_metrics()
+print("mnit10 : {} mr1 : {} map : {}".format (a,b,c))
