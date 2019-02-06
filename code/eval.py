@@ -46,6 +46,7 @@ def eval_metrics():
     for each in sorted(os.listdir(directory)):
         if each.split("_")[-1].split(".")[0] == '01':
             original_files.append(os.path.join(directory, each))
+            pair_file.append(os.path.join(directory, each))
         else:
             pair_file.append(os.path.join(directory, each))
 
