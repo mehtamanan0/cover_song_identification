@@ -35,7 +35,9 @@ def sim_matrix(original_features, cover_features):
     return np.array(similarity_matrix)
 
 def eval_metrics():
-    original_files = []
+
+    #defining variables
+    cover_originals = []
     pair_file = []
     directory = '../data/mirex-test/'
     t_cover = 0
@@ -43,21 +45,28 @@ def eval_metrics():
     mr1 = 0
     mnit10 = 0
     apc = 0
+
+    # making 2 lists where cover_originals contains the cover songs where each cover will have 11 respective original songs
     for each in sorted(os.listdir(directory)):
         if each.split("_")[-1].split(".")[0] == '01':
-            original_files.append(os.path.join(directory, each))
+            cover_originals.append(os.path.join(directory, each))
             pair_file.append(os.path.join(directory, each))
         else:
             pair_file.append(os.path.join(directory, each))
 
-    for cov in original_files:
+    # we first iterate over each cover song to get it's original song ranking
+    for cov in cover_originals:
         p_bar = tqdm(total = len(pair_file))
         cover_features = load_extract(cov)
         dic = {}
+
+    # for each cover we go through a list of original songs to get a ranking
         for ncov in pair_file:
             if cov == ncov:
                 continue
             p_bar.update(1)
+
+            #create a similarity matrix for both the cover and original
             original_features = load_extract(ncov)
             oti_cov = oti_func(original_features, cover_features)
             mat = sim_matrix(original_features, oti_cov)[:180, :180]
@@ -65,13 +74,22 @@ def eval_metrics():
                 mat = np.pad(mat, ((0,180 - mat.shape[0]),(0,0)), mode = 'constant', constant_values=0)
             if mat.shape[1] < 180:
                 mat = np.pad(mat, ((0,0),(0,180 - mat.shape[1])), mode = 'constant', constant_values=0)
+
+            # we make a dictionary where each key is the original and its value is the cover probibility
             dic[ncov.split("/")[-1].split(".")[0]] = model.predict(mat.reshape(1,180,180,1))[0][1]
+
+        # we sort the dictionary in desending order on the basis of value
         l = sorted(dic.items(), key=operator.itemgetter(1), reverse=True)[:10]
-        print(cov.split("/")[-1].split("_")[1])
+        print("current song : {}".format(cov.split("/")[-1].split("_")[1]))
         pp.pprint(l)
         flag = 1
         rank = 0
         ap = 0
+
+        # we iterate over the top 10 ranking covers
+        # rank will be the value that hold the first rank of the correctly identified cover
+        # t_cover is the count of the number of correctly identified covers in a rank list of 10
+        # ap is the variable that is a product of the probobility and 1 if it is a cover pair
         for i, c in enumerate(l):
             if cov.split("/")[-1].split("_")[1] == c[0].split("_")[1]:
                 if flag:
@@ -83,10 +101,10 @@ def eval_metrics():
         apc += ap/11
         print("average precision : {}".format(apc))
         print("cover count: {}".format(t_cover))
-        mri += 1/rank
+        mri += rank
         p_bar.close()
-    mean_ap = apc/len(original_files)
-    mr1 = mri/len(original_files)
+    mean_ap = apc/len(cover_originals)
+    mr1 = mri/len(cover_originals)
     mnit10 = t_cover/3300
     return mnit10, mr1, mean_ap
 
