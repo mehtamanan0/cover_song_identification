@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 label = sys.argv[1]
 lis = os.listdir("../data/csm/{}".format(label))
-p_bar = tqdm(total = len(pair_file))
+p_bar = tqdm(total = len(lis))
 
 for each in lis:
     p_bar.update(1)
