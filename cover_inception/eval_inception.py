@@ -123,14 +123,15 @@ def eval_metrics():
         # we iterate over the top 10 ranking covers
         # rank will be the value that hold the first rank of the correctly identified cover
         # t_cover is the count of the number of correctly identified covers in a rank list of 10
-        # ap is the variable that is a product of the probobility and 1 if it is a cover pair for i, c in enumerate(l):
-        if cov.split("/")[-1].split("_")[1] == c[0].split("_")[1]:
-            if flag:
-                flag = 0
-                rank = i + 1
-                print("rank : {}".format(rank))
-            t_cover += 1
-            ap += (c[1] * 1)
+        # ap is the variable that is a product of the probobility and 1 if it is a cover pair 
+        for i, c in enumerate(l):
+            if cov.split("/")[-1].split("_")[1] == c[0].split("_")[1]:
+                if flag:
+                    flag = 0
+                    rank = i + 1
+                    print("rank : {}".format(rank))
+                t_cover += 1
+                ap += (c[1] * 1)
         apc += ap/11
         print("average precision : {}".format(apc))
         print("cover count: {}".format(t_cover))
