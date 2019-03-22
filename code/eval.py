@@ -12,6 +12,7 @@ from tqdm import tqdm
 pp = pprint.PrettyPrinter(indent=4)
 model = load_model('../data/models/model_1637.h5')
 
+# function to convert the features into an oti noramilzed form
 def oti_func(original_features, cover_features):
     profile1 = np.sum(original_features.T, axis = 1)
     profile2 = np.sum(cover_features.T, axis = 1)
@@ -22,9 +23,11 @@ def oti_func(original_features, cover_features):
     newmusic = np.roll(cover_features.T, int(oti[0]))
     return newmusic.T
 
+# uses librosa to read the features from csv generated of csm's
 def load_extract(path):
     return pd.read_csv(path, header=None).values.T
 
+# generate a csm from the oti cover features and original features
 def sim_matrix(original_features, cover_features):
     similarity_matrix = []
     for each in original_features:
